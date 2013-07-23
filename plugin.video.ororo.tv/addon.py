@@ -1,7 +1,29 @@
 # -*- coding: utf-8 -*-
 
-import urllib, urllib2, re, sys
-import xbmcplugin, xbmcgui
+import sys, urllib, re, os.path, datetime, time, urllib2, cookielib, urlparse
+import xbmc, xbmcgui, xbmcplugin, xbmcvfs
+
+from os.path import basename
+from urlparse import urlsplit
+
+def url2name(url):
+    return basename(urlsplit(url)[2])
+
+def download(url, localFileName = None):
+    localName = url2name(url)
+    req = urllib2.Request(url)
+    r = urllib2.urlopen(req)
+    if r.info().has_key('Content-Disposition'):
+        localName = r.info()['Content-Disposition'].split('filename=')[1]
+        if localName[0] == '"' or localName[0] == "'":
+            localName = localName[1:-1]
+    elif r.url != url: 
+        localName = url2name(r.url)
+    if localFileName: 
+        localName = localFileName
+    f = open(localName, 'wb')
+    f.write(r.read())
+    f.close()
 
 def getHTML(url):
     conn = urllib2.urlopen(urllib2.Request(url + urllib.urlencode({})))
@@ -27,9 +49,9 @@ def Movies(url):
 
 def Videos(url, title):
     html = getHTML(url)
-    link = re.compile("<source src='(.+?)' type='video/mp4'>").findall(html.decode('utf-8')) [0]
-
-    addLink(title, 'http://ororo.tv' + link)
+    videoLink = re.compile("<source src='(.+?)' type='video/mp4'>").findall(html.decode('utf-8')) [0]
+    subLink = re.compile("<track default='default' kind='captions' label='English' src='(.+?)' srclang='en'>").findall(html.decode('utf-8'))[0]
+    addLink(title + ":video", 'http://ororo.tv' + videoLink, 'http://ororo.tv' + subLink)
 
 def get_params():
     param=[]
@@ -49,12 +71,16 @@ def get_params():
                             
     return param
 
-def addLink(title, url):
-    item = xbmcgui.ListItem(title, iconImage='DefaultVideo.png', thumbnailImage='')
-    item.setInfo( type='Video', infoLabels={'Title': title} )
+def addLink(title, url, subUrl):
+    # item = xbmcgui.ListItem(title, iconImage='DefaultVideo.png', thumbnailImage='')
+    # item.setInfo( type='Video', infoLabels={'Title': title} )
+    # item.setProperty('subtitle', subUrl)
+    # xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=item)
 
-    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=item)
+    # xbmc.Player().setSubtitles('http://ororo.tv/uploads/video/subtitle/14012/The_Cleveland_Show_-_1x07_-_A_Brown_Thanksgiving.en.srt')
 
+    xbmc.Player().play(url)
+    xbmc.Player().setSubtitles(subUrl)
 
 def addDir(title, url, mode):
     sys_url = sys.argv[0] + '?title=' + urllib.quote_plus(title) + '&url=' + urllib.quote_plus(url) + '&mode=' + urllib.quote_plus(str(mode))

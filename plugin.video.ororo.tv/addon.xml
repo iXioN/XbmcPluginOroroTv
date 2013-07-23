@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<addon id="plugin.video.engserials"
-       name="Eng serials"
-       version="0.8.0"
+<addon id="plugin.video.ororo.tv"
+       name="Ororo.TV"
+       version="0.9.0"
        provider-name="noname">
   <requires>
     <import addon="xbmc.python" version="1.0"/>
@@ -10,9 +10,9 @@
     <provides>video</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
-    <summary>Eng serials</summary>
+    <summary>Ororo.TV</summary>
     <description>
-		soramusoka@gmail.com
+		  soramusoka@gmail.com
     </description>
     <platform>all</platform>
   </extension>
